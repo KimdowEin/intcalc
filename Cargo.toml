@@ -1,6 +1,6 @@
 [package]
 name = "intcalc"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 
 [dependencies]
@@ -13,8 +13,13 @@ directories-next = "2.0"
 reqwest = "0.13.2"
 scraper = "0.26.0"
 serde = { version = "1.0.228", features = ["derive"] }
-serde-aux = "4.7.0"
-tap = "1.0.1"
-thiserror = "2.0.18"
 tokio = { version = "1.50.0", features = ["full"] }
 typed-builder = "0.23.2"
+
+[package.metadata.deb]
+maintainer = "KimdowEin <zhyimg@163.com>"
+# license-file = ["LICENSE", "4"]
+depends = "$auto, openssl"
+extended-description = "LPR利息计算工具"
+section = "utils"
+priority = "optional"

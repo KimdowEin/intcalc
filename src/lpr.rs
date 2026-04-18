@@ -1,4 +1,4 @@
-use std::{env, ops::DivAssign, path::PathBuf, sync::LazyLock};
+use std::{env, path::PathBuf, sync::LazyLock};
 
 use anyhow::Error;
 use chrono::NaiveDate;
@@ -26,22 +26,23 @@ pub fn lpr_rate_path() -> PathBuf {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct LprRateRecord {
+    /// 利率发布日期
     pub date: NaiveDate,
-    /// rate%
-    pub rate_1y: f64,
-    /// rate%
-    pub rate_5y: f64,
+    /// 一年期利率，已经对%进行处理
+    pub rate1y: f64,
+    /// 五年期利率，已经对%进行处理
+    pub rate5y: f64,
 }
 impl LprRateRecord {
-    pub fn new(date: NaiveDate, rate_1y: f64, rate_5y: f64) -> Self {
+    pub fn new(date: NaiveDate, rate1y: f64, rate5y: f64) -> Self {
         Self {
             date,
-            rate_1y,
-            rate_5y,
+            rate1y,
+            rate5y,
         }
     }
     pub fn get_rate(&self, use_5y: bool) -> f64 {
-        use_5y.then_some(self.rate_5y).unwrap_or(self.rate_1y)
+        use_5y.then_some(self.rate5y).unwrap_or(self.rate1y)
     }
 }
 
@@ -69,8 +70,8 @@ impl LprRates {
         let rates = records
             .into_iter()
             .map(|mut rate| {
-                rate.rate_1y.div_assign(100.0);
-                rate.rate_5y.div_assign(100.0);
+                rate.rate1y /= 100.0;
+                rate.rate5y /= 100.0;
                 rate
             })
             .collect::<Vec<_>>();
@@ -96,30 +97,22 @@ impl LprRates {
         writer.flush()?;
         Ok(())
     }
-
-    pub fn find_lpr_before(&self, date: NaiveDate) -> Option<&LprRateRecord> {
-        self.iter()
-            .filter(|rate| rate.date <= date)
-            .max_by_key(|rate| rate.date)
-    }
 }
 
 #[cfg(test)]
 mod tests {
-    use tap::Tap;
-
     use super::*;
 
     #[tokio::test]
     async fn test_update_lpr() -> Result<(), Error> {
         LprRates::fetch_lpr()
-            .await?
-            .tap(|record| assert!(!record.is_empty()))
+            .await
+            .inspect(|record| assert!(!record.is_empty()))?
             .iter()
             .for_each(|record| {
                 assert!(record.date.to_string().len() == 10);
-                assert!(record.rate_1y >= 0.0);
-                assert!(record.rate_5y >= 0.0);
+                assert!(record.rate1y >= 0.0);
+                assert!(record.rate5y >= 0.0);
             });
         Ok(())
     }

@@ -8,14 +8,9 @@ use crate::{calc::lpr::LprCalc, lpr::LprRates};
 pub static DEBUG: OnceLock<bool> = OnceLock::new();
 
 #[derive(Parser)]
-#[command(name = "apr_calc")]
-#[command(about = "APR Calculator CLI", long_about = None)]
-#[command(long_about = "
-本工具仅供参考，不构成法律意见。
-利率数据及计算逻辑可能存在延迟或误差，实际利息以合同约定、司法机关认定或官方数据为准。
-使用者应自行复核结果，作者不对任何损失承担责任。
-使用即视为同意本声明。
-")]
+#[command(name = "intcalc")]
+#[command(about = "Interest Calculator CLI")]
+#[command(long_about = include_str!("../README.md"))]
 
 pub struct Cli {
     /// 是否打印计算细则
@@ -28,7 +23,7 @@ pub struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
-    /// 更新lpr
+    /// 更新LPR
     Update,
     /// 计算利息
     Lpr(LprCalc),
