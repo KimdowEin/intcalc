@@ -16,6 +16,10 @@ serde = { version = "1.0.228", features = ["derive"] }
 tokio = { version = "1.50.0", features = ["full"] }
 typed-builder = "0.23.2"
 
+[dev-dependencies]
+rand = "0.8"
+rayon = "1"
+
 [package.metadata.deb]
 maintainer = "KimdowEin <zhyimg@163.com>"
 # license-file = ["LICENSE", "4"]

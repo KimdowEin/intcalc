@@ -1,4 +1,4 @@
-use std::{env, path::PathBuf, sync::LazyLock};
+use std::{env, fs::create_dir_all, path::PathBuf, sync::LazyLock};
 
 use anyhow::Error;
 use chrono::NaiveDate;
@@ -15,11 +15,11 @@ static LPR_TR_SELECTOR: LazyLock<Selector> =
     LazyLock::new(|| Selector::parse("table tbody tr td").unwrap());
 
 pub fn lpr_rate_path() -> PathBuf {
-    ProjectDirs::from("com", "zhyimg", "apr_calc")
+    ProjectDirs::from("com", "zhyimg", "intcalc")
         .map(|dirs| dirs.data_local_dir().join("lpr_rates.csv"))
         .unwrap_or_else(|| {
             env::temp_dir()
-                .join("com.zhyimg.apr_calc")
+                .join("com.zhyimg.intcalc")
                 .join("lpr_rates.csv")
         })
 }
@@ -88,7 +88,14 @@ impl LprRates {
     }
 
     pub fn save_csv(&self) -> Result<(), Error> {
-        let mut writer = csv::Writer::from_path(lpr_rate_path())?;
+        let rate_path = lpr_rate_path();
+
+        rate_path
+            .parent()
+            .ok_or(Error::msg("lpr rate 创建失败"))
+            .and_then(|path| create_dir_all(&path).map_err(Error::from))?;
+
+        let mut writer = csv::Writer::from_path(&rate_path)?;
 
         self.rates
             .iter()

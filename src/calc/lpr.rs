@@ -30,7 +30,7 @@ pub struct LprCalc {
 }
 
 impl LprCalc {
-    pub fn insert_start_end_point(&self, rates: &mut LprRates) {
+    fn insert_start_end_point(&self, rates: &mut LprRates) {
         rates.sort_by_key(|rate| rate.date);
 
         rates
@@ -84,6 +84,12 @@ impl LprCalc {
                     .build()
             })
             .collect::<Vec<_>>()
+    }
+
+    pub fn calc(&self, rates: LprRates) -> f64 {
+        self.to_calc_elements(rates)
+            .into_iter()
+            .fold(0., |sum, ele| sum + ele.calc())
     }
 }
 

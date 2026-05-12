@@ -40,10 +40,7 @@ impl Cli {
             }
             Commands::Lpr(lpr_calc) => {
                 let lpr_rates = LprRates::load_csv()?;
-                let interest = lpr_calc
-                    .to_calc_elements(lpr_rates)
-                    .into_iter()
-                    .fold(0., |sum, ele| sum + ele.calc());
+                let interest = lpr_calc.calc(lpr_rates);
                 println!("{:.2}", interest);
             }
         }
